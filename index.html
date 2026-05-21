@@ -205,7 +205,12 @@
       <input id="paymentMethod" type="text" placeholder="Example: Cash, Zelle, Check, Venmo" />
 
       <label for="rentalPeriod">Rental Period Covered</label>
-      <input id="rentalPeriod" type="text" placeholder="Example: June 1, 2026 to June 30, 2026" />
+      <!--<input id="rentalPeriod" type="text" placeholder="Example: June 1, 2026 to June 30, 2026" />-->
+<label for="fromBox">From:</label>
+<input type="date" id="fromBox">
+
+<label for="toBox">To:</label>
+<input type="date" id="toBox">
 
       <label for="notes">Additional Receipt Notes</label>
       <textarea id="notes" placeholder="Example: Payment received in full for room rent. This receipt does not modify any rental agreement terms."></textarea>
@@ -256,9 +261,9 @@
         <span id="displayRoom">-</span>
       </div>
 
-      <div class="receipt-row">
+            <div class="receipt-row">
         <strong>Rental Period</strong>
-        <span id="displayPeriod">-</span>
+        <strong>From</strong><span id="displayPeriodFrom">-</span><strong>To</strong><span id="displayPeriodTo">-</span>
       </div>
 
       <div class="receipt-row">
@@ -322,7 +327,9 @@
       const amountPaid = getValue("amountPaid");
       const paymentDate = getValue("paymentDate");
       const paymentMethod = getValue("paymentMethod");
-      const rentalPeriod = getValue("rentalPeriod");
+      //const rentalPeriod = getValue("rentalPeriod");
+      const fromBox = getValue("fromBox");
+      const toBox = getValue("toBox");
       const notes = getValue("notes");
 
       if (!renterName || !amountPaid || !paymentDate) {
@@ -336,7 +343,8 @@
       setText("displayLandlord", landlordName);
       setText("displayAddress", propertyAddress);
       setText("displayRoom", roomDescription || "Room rental payment");
-      setText("displayPeriod", rentalPeriod);
+      setText("displayPeriodFrom", formatDate(fromBox));
+      setText("displayPeriodTo", formatDate(toBox));
       setText("displayMethod", paymentMethod);
       setText("displayAmount", formatMoney(amountPaid));
 
