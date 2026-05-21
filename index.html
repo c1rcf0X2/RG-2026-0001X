@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Rental Receipt Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .panel,
+    .receipt {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .success-message {
+      margin-top: 12px;
+      color: #047857;
+      font-weight: bold;
+      min-height: 20px;
+    }
+
+    .receipt {
+      line-height: 1.6;
+    }
+
+    .receipt-header {
+      text-align: center;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .receipt-title {
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 8px 0;
+    }
+
+    .receipt-row strong {
+      min-width: 150px;
+    }
+
+    .amount {
+      font-size: 22px;
+      font-weight: bold;
+      color: #047857;
+    }
+
+    .signature-area {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .signature-line {
+      border-top: 1px solid #111827;
+      padding-top: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .small-note {
+      margin-top: 22px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    @media (max-width: 850px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .panel,
+      .button-row,
+      .success-message {
+        display: none;
+      }
+
+      .app {
+        display: block;
+        max-width: 800px;
+      }
+
+      .receipt {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>Room Rental Receipt Generator</h1>
+      <p>Enter the payment details, then copy or print the completed receipt.</p>
+
+      <label for="landlordName">Received By / Landlord Name</label>
+      <input id="landlordName" type="text" placeholder="Example: Ray Ventura" />
+
+      <label for="propertyAddress">Residence / Property Address</label>
+      <input id="propertyAddress" type="text" placeholder="Example: 123 Main Street, Temecula, CA" />
+
+      <label for="renterName">Renter Name</label>
+      <input id="renterName" type="text" placeholder="Example: Juan Dela Cruz" />
+
+      <label for="roomDescription">Room / Rental Description</label>
+      <input id="roomDescription" type="text" placeholder="Example: Room rental payment for Bedroom 2" />
+
+      <label for="amountPaid">Amount Paid</label>
+      <input id="amountPaid" type="number" min="0" step="0.01" placeholder="Example: 750.00" />
+
+      <label for="paymentDate">Date Paid</label>
+      <input id="paymentDate" type="date" />
+
+      <label for="paymentMethod">Payment Method</label>
+      <input id="paymentMethod" type="text" placeholder="Example: Cash, Zelle, Check, Venmo" />
+
+      <label for="rentalPeriod">Rental Period Covered</label>
+      <input id="rentalPeriod" type="text" placeholder="Example: June 1, 2026 to June 30, 2026" />
+
+      <label for="notes">Additional Receipt Notes</label>
+      <textarea id="notes" placeholder="Example: Payment received in full for room rent. This receipt does not modify any rental agreement terms."></textarea>
+
+      <div class="button-row">
+        <button class="primary" onclick="generateReceipt()">Generate Receipt</button>
+        <button class="secondary" onclick="copyReceipt()">Copy Receipt Text</button>
+        <button class="secondary" onclick="window.print()">Print / Save as PDF</button>
+        <button class="secondary" onclick="clearForm()">Clear</button>
+      </div>
+
+      <div id="message" class="success-message"></div>
+    </section>
+
+    <section id="receipt" class="receipt">
+      <div class="receipt-header">
+        <div class="receipt-title">RECEIPT</div>
+        <div>Room Rental Payment</div>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Receipt No.</strong>
+        <span id="receiptNumber">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Date Paid</strong>
+        <span id="displayDate">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Received From</strong>
+        <span id="displayRenter">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Received By</strong>
+        <span id="displayLandlord">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Property Address</strong>
+        <span id="displayAddress">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Rental Description</strong>
+        <span id="displayRoom">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Rental Period</strong>
+        <span id="displayPeriod">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Payment Method</strong>
+        <span id="displayMethod">-</span>
+      </div>
+
+      <div class="receipt-row">
+        <strong>Amount Received</strong>
+        <span id="displayAmount" class="amount">$0.00</span>
+      </div>
+
+      <p id="displayNotes" class="small-note">
+        Payment received for room rental. Keep this receipt for your records.
+      </p>
+
+      <div class="signature-area">
+        <div class="signature-line">Received By Signature</div>
+        <div class="signature-line">Renter Signature</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function setText(id, text) {
+      document.getElementById(id).innerText = text || "-";
+    }
+
+    function formatMoney(value) {
+      const number = Number(value || 0);
+      return number.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD"
+      });
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) return "-";
+      const date = new Date(dateValue + "T00:00:00");
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function createReceiptNumber() {
+      const now = new Date();
+      return "RR-" + now.getFullYear() + "-" + String(now.getTime()).slice(-6);
+    }
+
+    function generateReceipt() {
+      const landlordName = getValue("landlordName");
+      const propertyAddress = getValue("propertyAddress");
+      const renterName = getValue("renterName");
+      const roomDescription = getValue("roomDescription");
+      const amountPaid = getValue("amountPaid");
+      const paymentDate = getValue("paymentDate");
+      const paymentMethod = getValue("paymentMethod");
+      const rentalPeriod = getValue("rentalPeriod");
+      const notes = getValue("notes");
+
+      if (!renterName || !amountPaid || !paymentDate) {
+        document.getElementById("message").innerText = "Please enter renter name, amount paid, and date paid.";
+        return;
+      }
+
+      setText("receiptNumber", createReceiptNumber());
+      setText("displayDate", formatDate(paymentDate));
+      setText("displayRenter", renterName);
+      setText("displayLandlord", landlordName);
+      setText("displayAddress", propertyAddress);
+      setText("displayRoom", roomDescription || "Room rental payment");
+      setText("displayPeriod", rentalPeriod);
+      setText("displayMethod", paymentMethod);
+      setText("displayAmount", formatMoney(amountPaid));
+
+      document.getElementById("displayNotes").innerText = notes ||
+        "Payment received for room rental. Keep this receipt for your records.";
+
+      document.getElementById("message").innerText = "Receipt generated.";
+    }
+
+    function copyReceipt() {
+      const receiptText = document.getElementById("receipt").innerText;
+
+      navigator.clipboard.writeText(receiptText)
+        .then(function () {
+          document.getElementById("message").innerText = "Receipt copied to clipboard.";
+        })
+        .catch(function () {
+          document.getElementById("message").innerText = "Copy failed. Highlight the receipt and press Ctrl+C.";
+        });
+    }
+
+    function clearForm() {
+      const fields = [
+        "landlordName",
+        "propertyAddress",
+        "renterName",
+        "roomDescription",
+        "amountPaid",
+        "paymentDate",
+        "paymentMethod",
+        "rentalPeriod",
+        "notes"
+      ];
+
+      fields.forEach(function (id) {
+        document.getElementById(id).value = "";
+      });
+
+      document.getElementById("message").innerText = "Form cleared.";
+    }
+
+    document.getElementById("paymentDate").valueAsDate = new Date();
+  </script>
+</body>
+</html>
